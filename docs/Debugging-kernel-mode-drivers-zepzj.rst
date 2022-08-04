@@ -1,0 +1,64 @@
+Debugging kernel mode drivers
+
+𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝 𝐡𝐞𝐫𝐞 ===> https://is.gd/8RtTnR?463231
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+Enter g to let the target computer run. If the target computer doesn't break in to the debugger immediately, perform a few actions on the target computer for example, open Notepad.
+To see the stack trace, enter these commands:. On the Debug menu, choose Step Over or press F Enter step commands a few more times as you watch the Disassembly window. The output of! Copy the address of a physical device object PDO , and enter this command:.
+To set and verify a breakpoint at ClassGlobalDispatch, enter these commands:. If the target computer doesn't break in to the debugger immediately, perform a few actions on the target computer for example, open Notepad and save a file. The target computer will break in to the debugger when ClassGlobalDispatch is called. Make sure that you do not write to the wrong part of kernel memory, because it can corrupt data structures and frequently causes the computer to stop responding that is, crash.
+Local kernel debugging is a very delicate operation. Be careful that you do not corrupt or crash the system. One of the most difficult aspects of local kernel debugging is that the machine state is constantly changing. Memory is paged in and out, the active process constantly changes, and virtual address contexts do not remain constant. However, under these conditions, you can effectively analyze things that change slowly, such as certain device states.
+Kernel-mode drivers and the Windows operating system frequently send messages to the kernel debugger by using DbgPrint and related functions. These messages are not automatically displayed during local kernel debugging. You can display them by using the! The LiveKD tool simulates local kernel debugging. The output shows that we have a farily simple device driver stack. The PnPManager is a root node. Note For more information about more complex driver stacks, see Driver stacks and Device nodes and device stacks.
+Breakpoints are used to stop code execution at a particular line of code. You can then step forward in the code from that point, to debug that specific section of code.
+Sets a breakpoint that is unresolved when the module is unloaded and re-enables when the module reloads. Sets a breakpoint for a symbol.
+As you are working with a driver it can be handy to see all of the messages that it may display. Type the following to change the default debug bit mask so that all debug messages from the target system will be displayed in the debugger.
+Set the breakpoint with the bm command using the name of the driver, followed by the function name AddDevice where you want to set the breakpoint, separated by an exclamation mark. For more information, see Using Breakpoints. List the current breakpoints to confirm that the breakpoint was set by typing the bl command.
+In Windows, open Device Manager by using the icon or by entering mmc devmgmt. In Device Manager expand the Sound, video and game controllers node. Select and hold or right-click the virtual audio driver entry and select Disable from the menu. Select and hold or right-click the virtual audio driver entry again and select Enable from the menu. This should cause Windows to reload the driver, which calls AddDevice.
+This will cause the AddDevice debug breakpoint to fire and the execution of the driver code on the target system should halt. Step line-by-line through the code by typing the p command or pressing F You can provide a number to the p command to step forward multiple lines, for example p 5.
+When you are done stepping through the code, use the go command g to restart execution on the target system. You can also set breakpoints that fire when a memory location is accessed. Use the ba break on access command, with the following syntax. Note that the breakpoint dialog box only works with existing breakpoints. New breakpoints must be set from the command line.
+Different parts of the audio driver code is called to respond to various events, after the device driver is loaded. In the next section, we set a breakpoint that will fire when the user adjusts the volume control for the virtual audio driver.
+To locate the method that changes the volume, use the x command to list the symbols in CAdapterCommon, that contain the string volume. Select and hold or right-click Sink Description Sample and select Properties. Select the Levels tab. Adjust the slider volume. This should cause the SetMixerVolume debug breakpoint to fire and execution of the driver code on the target system should halt.
+Use the dv command to display the current variables and their values. More information on variables is provided in the next section of this lab. The following are the commands that you can use to step through your code with the associated keyboard short cuts shown in parentheses.
+Step over F10 — This command causes code execution to proceed one statement or one instruction at a time. If a call is encountered, code execution passes over the call without entering the called routine.
+Step in F11 — This command is like step-over, except that the execution of a call does go into the called routine. This is useful if you've seen enough of the routine.
+Note that if the flow of code execution does not reach the point indicated by the cursor e. This is handy if you want to retry a sequence, but it requires some care. For example, registers and variables are not set to what they would be if code execution had reached that line naturally. Direct setting of the eip register -- You can put a value into the eip register, and as soon as you press F5 or F10, F11, etc.
+This is similar to setting instruction to the cursor-designated current line, except that you specify the address of an assembly instruction. It can be easier to step through UI rather than from the command line so this method is recommended. If necessary, the following commands can be used to step through a source file at the command line:. You can set a breakpoint in code by adding the DebugBreak statement and rebuilding the project and re-installing the driver.
+This breakpoint will fire each time the driver is enabled, so it would be a techniques to be used in the early development stages, not in production code. This technique is not as flexible as dynamically setting breakpoints using the breakpoint commands. Tip: You may want to keep a copy of the Sysvad driver with out the breakpoint added for further lab work. Set a break to occur each time the AddDevice method is run by adding the DebugBreak statement to the sample code.
+Follow all of the steps previously described to rebuild the driver in Microsoft Visual Studio and re-install it to the target machine. Be sure to uninstall the existing driver before installing the updated driver. When the code runs and reaches the DebugBreak statement, execution will stop and a message will be displayed. It can be useful to examine variables as the code executes to confirm that the code is working as expected.
+This labs examines variables as the audio driver produces sound. Use the dv command to examine the locale variables associated with the tabletaudiosample! Locate a small media file such as Windows notification sound file with a.
+For example you can use Ring When the media file is played, the breakpoint should fire, and execution of the driver code on the target system should halt. The source code Window should be highlighting the brace on the entrance to the NewStream function.
+You can display the names and values of all local variables for a given frame by typing the dv command. To use DML to explore variables, select the underlined elements. The select action builds a dx Display NatVis Expression command that allows you to drill down on nested data structures.
+You can find the memory location of a global variable by typing? We will use the x64 version of WinDbg. By default it is located here. This labs assumes that both PCs are running a 64 bit version of Windows on both the target and host. If that is not the case, the best approach is to run the same "bitness" of tools on the host that the target is running. For example if the target is running 32 bit Windows, run a 32 version of the debugger on the host.
+Launch WinDbg with remote user debug using the following command. The value for the key and port match what we set earlier using BCDEdit on the target. The Debugger Command window is the primary debugging information window in WinDbg. You can enter debugger commands and view the command output in this window. The Debugger Command window is split into two panes. You type commands in the smaller pane the command entry pane at the bottom of the window and view the command output in the larger pane at the top of the window.
+In the command entry pane, use the up arrow and down arrow keys to scroll through the command history. In Section 2, you will use debug commands to display information about the target system. Some debug commands display text using Debugger Markup Language that you can select to quickly gather more information. Note Output that has been omitted is indicated with "… " in this lab. Typically, you would be working with your own driver code when you use WinDbg. With the source code available, it will also be easier to understand the information that is displayed in WinDbg.
+In addition, this sample is used to illustrate how you can single step through native kernel mode code. This technique can be very valuable for debugging complex kernel mode code issues. Select and hold or right-click Windows-driver-samples-master. Specify a new folder, or browse to an existing one that will store the extracted files. Double-click the kmdfecho solution file to open it. In Visual Studio, locate the Solution Explorer. If this is not already open, choose Solution Explorer from the View menu.
+In Solution Explorer, you can see one solution that has three projects. In Solution Explorer, select and hold or right-click Solution 'kmdfecho' 3 projects , and choose Configuration Manager. Make sure that the configuration and platform settings are the same for the three projects.
+By default, the configuration is set to "Win10 Debug", and the platform is set to "Win64" for all the projects. Without this setting, you have to install the MSVC runtime to the target computer separately. This is required because Windows requires that drivers are signed.
+If all goes well, the build windows should display a message indicating that the build for all three projects succeeded. In File Explorer, navigate to the folder that contains the extracted files for the sample. Within that folder, the location of the compiled driver files varies depending on the configuration and platform settings that you selected in the Configuration Manager. In addition, the echoapp. Locate a USB thumb drive or set up a network share to copy the built driver files and the test EchoApp from the host to the target system.
+In the next section, you will copy the code to the target system, and install and test the driver. The computer where you install the driver is called the target computer or the test computer.
+Typically, this is a separate computer from the computer on which you develop and build the driver package. The computer where you develop and build the driver is called the host computer. The process of moving the driver package to the target computer and installing the driver is called deploying the driver.
+Before you deploy a test signed driver, you must prepare the target computer by enabling test signing. When the PC reboots, select Startup options. For example, look in the following folder:. Copy devcon. Locate the. Copy all the files from the built driver described earlier on the host computer and save them to the same folder that you created on the target computer. On the target computer, select and hold or right-click the certificate file, and select Install , then follow the prompts to install the test certificate.
+If you need more detailed instructions for setting up the target computer, see Preparing a Computer for Manual Driver Deployment. The following instructions show you how to install and test the sample driver. Here's the general syntax for the devcon tool that you will use to install the driver:.
+The INF file required for installing this driver is echo. The inf file contains the hardware ID for installing the echo. Navigate to your driver package folder, and enter the following command:. Select Install this driver anyway to proceed. If you have any issues with the installation, check the following file for more information. On the target computer, in a Command Prompt window, enter devmgmt open Device Manager.
